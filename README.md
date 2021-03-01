@@ -1,4 +1,4 @@
-# Credit Risk Modeling for Loan Default
+# Credit Risk Modeling for Loan Defaults
 
 ## Project Overview
 * Goal: this project aims to measure the credit risk of a lending institution by calculating the expected loss of the outstanding loans
