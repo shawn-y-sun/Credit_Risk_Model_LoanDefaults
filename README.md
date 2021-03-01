@@ -2,11 +2,8 @@
 
 ## Project Overview
 * Goal: this project aims to measure the credit risk of a lending institution by calculating the expected loss of the outstanding loans
-* Purpose: there are two major purposes of credit risk modeling for a financial institution:
-  * Conform to the regulatory requirements 
-  * Improve credit risk management procedures to maximize profits while having the risk under control
-* Pedicted Outcome: the Expected Loss (EL) are estimated based on three credit risk models: PD (Probability of Default), LGD (Loss Given Default), and EAD (Exposure at Default) models
-  * Calculation: EL = PD * LGD * EAD
+* Reasons: credit risk modeling is part of the regulartory requirements of risk management for financial institutions; it also allows a loan-lending practice to maximize profits while having the risk under control
+* Approach: the Expected Loss (EL) are calculated by multiplying three credit risk models, PD (Probability of Default), LGD (Loss Given Default), and EAD (Exposure at Default)
 
 ## Code and Resources Used
 * __Python Version__: 3.8.5
@@ -34,13 +31,13 @@ Dataset: *'loan_data_2007_2014.csv'* <br>
 * Remove the reference variable
 
 ### Model Building
-__Outcome Variable:__ *loan_status* <br>
 __Algorithm:__ Logistic Regression <br>
+__Outcome Variable:__ *loan_status* <br>
 
 ### Model Evaluation
 __Confusion Matrix__
 
-| Predicted<br>Actual | 0        | 1        |
+| Predicted<br>Actual | 0     | 1        |
 |------------------|----------|----------|
 | 0                | 0.079072 | 0.030196 |
 | 1                | 0.384025 | 0.506707 |
