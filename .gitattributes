@@ -1,0 +1,6 @@
+loan_data_2007_2014.csv filter=lfs diff=lfs merge=lfs -text
+loan_data_2015.csv filter=lfs diff=lfs merge=lfs -text
+loan_data_inputs_test.csv filter=lfs diff=lfs merge=lfs -text
+loan_data_inputs_train.csv filter=lfs diff=lfs merge=lfs -text
+loan_data_2007_2014_preprocessed.csv filter=lfs diff=lfs merge=lfs -text
+loan_data_inputs_2015.csv filter=lfs diff=lfs merge=lfs -text
