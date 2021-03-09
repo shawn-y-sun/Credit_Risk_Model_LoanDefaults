@@ -45,7 +45,7 @@ loan_data['emp_length_int'] = pd.to_numeric(loan_data['emp_length_int'])
 ```
 
 
-__Missing values__<br>
+#### Missing values
 Replace with appropriate values or 0
 ```
 loan_data['total_rev_hi_lim'].fillna(loan_data['funded_amnt'], inplace=True)
@@ -71,7 +71,7 @@ loan_data['emp_length_int'].fillna(0, inplace=True)
 For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard
 
 
-__Dependent variable__<br>
+#### Dependent variable
 We determine whether the loan is good (i.e. not defaulted) by looking at 'loan_status'. We assign a value of 1 if the loan is good, 0 if not
 ```
 loan_data['good_bad'] = \
@@ -82,7 +82,7 @@ np.where(loan_data['loan_status'].\
 ```
 
 
-__Discrete Categories__<br>
+#### Discrete Categories
 ```
 loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix_sep = ':'),
                      pd.get_dummies(loan_data['sub_grade'], prefix = 'sub_grade', prefix_sep = ':'),
@@ -96,7 +96,7 @@ loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix
 
 
 ### Grouping Dummy Variables
-__Methodology: 'Weight of Evidence' and 'Information Value'__<br>
+#### Methodology: 'Weight of Evidence' and 'Information Value'
 - 'Weight of Evidence' shows to what extent an independent variable would predict a dependent variable, giving us an insight into how useful a given category of an independent variable is
 
 WoE = ln(%good / %bad)
@@ -114,8 +114,7 @@ IV = Sum((%good - %bad) * WoE)
 | 0.5 < IV        | Suspisciously high, too good to be true |
 
 
-__Creating WoE and Visulization Function__
-
+#### Creating WoE and Visulization Function
 ```
 # WoE function for discrete unordered variables
 def woe_discrete(df, discrete_variabe_name, good_bad_variable_df):
@@ -191,7 +190,7 @@ def plot_by_woe(df_WoE, rotation_of_x_axis_labels = 0):
 ```
 
 
-__Computing and Visualizing WoE__
+#### Computing and Visualizing WoE
 
 For discrete variables, we order them by WoE and set the category with the worst credit risk as a reference category
 
@@ -222,7 +221,7 @@ df_temp.head()
 | 4 | (12.48, 15.6]    | 8289  | 0.888286  | 0.088883   | 7363   | 926   | 0.088639    | 0.090873   | -0.024892 | 0.013445       | 0.128892 | inf |
 
 
-__Grouping Categories__<br>
+#### Grouping Categories
 
 We group the categories or bins by following features:
 - Small number of observations
@@ -257,7 +256,7 @@ np.where((df_inputs_prepr['total_acc'] >= 52), 1, 0)
 
 ### Create and Export Train and Test Datasets
 
-__Before Grouping Dummies' Pipeline__
+#### Before Grouping Dummies' Pipeline
 
 We first split the dataset into training and testing parts
 ```
@@ -285,7 +284,7 @@ df_targets_prepr = loan_data_targets_train
 ```
 
 
-__After Grouping Dummies' Pipeline__
+#### After Grouping Dummies' Pipeline
 
 We store the dataset with grouped dummies to a to_be_saved dataset
 ```
@@ -307,16 +306,17 @@ loan_data_targets_test.to_csv('loan_data_targets_test.csv')
 
 
 ### Model Building
+We will trian and fit statistical model to predict a borrower's probability of being good 
 
-__Excluding Features__
+#### Excluding Features
 
 We exclude the reference categories in our model as we used dummy variables to represent all features, making the reference categories redundant
 
-__Choosing Logistic Regression__
+#### Choosing Logistic Regression
 
 We select logistic regression as our model because the outcome variable has only two outcomes: good (1) or bad (0)
 
-__Building Logistic Regression with P-Values__
+#### Building Logistic Regression with P-Values
 ```
 # As there is no built-in method to calcualte P values for 
 #  sklearn logistic regression
@@ -345,11 +345,11 @@ class LogisticRegression_with_p_values:
         self.p_values = p_values
 ```
 
-__Selecting Features__
+#### Selecting Features
 
 We leave a group of features if one of the dummy variables has a p value smaller than 0.05, meaning it is a significant variable
 
-__Training the Model with Selected Features__
+#### Training the Model with Selected Features
 ```
 reg2 = LogisticRegression_with_p_values()
 reg2.fit(inputs_train, loan_data_targets_train)
@@ -376,13 +376,15 @@ Finally, we save the model
 pickle.dump(reg2, open('pd_model.sav', 'wb'))
 ```
 
-### Model Validation
-__Excluding Features__
+### Model Evaluation
+We will apply the model on our testing dataset and use different measures to assess how accurate our model is, to know to what extent the outcome of interest can be explained by the available information.
+
+#### Excluding Features
 
 We remove the reference categories and insignificant features
 
 
-__Testing Model__
+#### Testing Model
 
 After running model on testing dataset, we get the following results
 
@@ -397,7 +399,7 @@ After running model on testing dataset, we get the following results
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) 'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
 
 
-__Confusion Matrix__
+#### Confusion Matrix
 
 We set the threshold at 0.9, meaning the borrower is predicted to a good borrower if the y_hat_test_proba >= 0.9
 ```
@@ -414,6 +416,7 @@ Then we can create the confusion matrix
 | 0                 | 0.079072 | 0.030196 |
 | 1                 | 0.384025 | 0.506707 |
 
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) When we set the threshold at 0.9, it would reduce the number of defaults, but also the number of overall approved loans. It means we can avoid much of the credit risk but cannot reach the best potential to make money (~38% of borrowers will be mistakenly rejected).
 
 ```
 In [50]:
@@ -425,14 +428,16 @@ true_rate
 Out[50]:
 0.5857790836076648
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is equivalent to the probaility of random classifying. But the power still is not strong enough
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is the accuracy of predicting by chance. But the power still is not strong enough. However, if we set the threshold at different levels, the accuracy will vary accordingly. Thus we need other measures to evaluate our model.
 
-#### ROC Curve and AUC####
+#### ROC Curve and AUC
 
 We further assess the predicting power by plotting the true positive rate against the false positive rate at various threshold settings
 
 ROC plot<br>
 ![image](https://user-images.githubusercontent.com/77659538/110450038-c7142700-80fd-11eb-945b-271244e47843.png)
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Each point from the curve represents a different confusion matrix based on a different threshold. In specific, it is equal to (True positive rate / False positive rate)
 
 We compute the area under ROC (AUROC)<br>
 ```
@@ -444,8 +449,66 @@ AUROC
 Out[56]:
 0.702208104993648
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model has a 'fair' predicting power, not perfect but good enough to use
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model has a 'fair' predicting power, not perfect but good enough to use.
 
 
+#### Gini and Kolmogorov-Smirnov
+
+Gini coefficient measures the ineqaulity between good borrowers and bad borrowers in a population.
+
+```
+plt.plot(df_actual_predicted_probs['Cumulative Perc Population'],
+         df_actual_predicted_probs['Cumulative Perc Bad'])
+plt.plot(df_actual_predicted_probs['Cumulative Perc Bad'],
+         df_actual_predicted_probs['Cumulative Perc Bad'],
+        linestyle = '--', color ='k')
+plt.xlabel('Cumulative % Population')
+plt.ylabel('Cumulative % Bad')
+plt.title('Gini')
+```
+
+![image](https://user-images.githubusercontent.com/77659538/110452593-4acf1300-8100-11eb-955c-e8885aaa5893.png)
+
+```
+In [61]:
+Gini = AUROC * 2 - 1
+Gini
+
+Out[61]:
+0.4044162099872961
+```
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve is upward further apart from the diagnoal line and the model has satisfactory predictive power.
+
+
+Kolmogorov-Smirnov coefficient measures the maximum difference between the cumulative distribution functions of 'good' and 'bad' borrowers. 
+
+```
+plt.plot(df_actual_predicted_probs['y_hat_test_proba'],
+         df_actual_predicted_probs['Cumulative Perc Bad'])
+plt.plot(df_actual_predicted_probs['y_hat_test_proba'],
+         df_actual_predicted_probs['Cumulative Perc Good'],
+        linestyle = '--', color ='k')
+plt.xlabel('Estimated Probability for being Good')
+plt.ylabel('Cumulative %')
+plt.title('Kolmogorov-Smirnov')
+```
+
+![image](https://user-images.githubusercontent.com/77659538/110452594-4acf1300-8100-11eb-8faa-c5f98c53c0cc.png)
+
+
+```
+In [63]:
+KS = max(df_actual_predicted_probs['Cumulative Perc Bad'] - df_actual_predicted_probs['Cumulative Perc Good'])
+KS
+
+Out[63]:
+0.2966746932223847
+```
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The two cumulative distribution functions are sufficiently far away from each other and the model has satisfactory predictive power.
+
+### Credit Scorecard Building
 
 
