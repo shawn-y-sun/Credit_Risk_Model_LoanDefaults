@@ -381,6 +381,7 @@ __Excluding Features__
 
 We remove the reference categories and insignificant features
 
+
 __Testing Model__
 
 After running model on testing dataset, we get the following results
@@ -393,7 +394,8 @@ After running model on testing dataset, we get the following results
 |     263083    |     1                         |     0.940636            |
 |     165001    |     1                         |     0.968665            |
 
-'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
+<span style="color:red">'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)</span>
+
 
 __Confusion Matrix__
 
@@ -423,3 +425,23 @@ true_rate
 Out[50]:
 0.5857790836076648
 ```
+<span style="color:red">The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is equivalent to the probaility of random classifying. But the power still is not strong enough.</span>
+
+__ROC Curve and AUC__
+
+We further assess the predicting power by plotting the true positive rate against the false positive rate at various threshold settings
+
+ROC plot<br>
+![image](https://user-images.githubusercontent.com/77659538/110450038-c7142700-80fd-11eb-945b-271244e47843.png)
+
+We compute the area under ROC (AUROC)<br>
+```
+In [56]:
+AUROC = roc_auc_score(df_actual_predicted_probs['loan_data_targets_test'], 
+                      df_actual_predicted_probs['y_hat_test_proba'])
+AUROC
+
+Out[56]:
+0.702208104993648
+```
+<span style="color:red"> The result implies our model has a 'fair' predicting power, not perfect but good enough to use </span>
