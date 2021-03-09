@@ -8,6 +8,7 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 ## Code and Resources Used
 * __Python Version__: 3.8.5
 * __Packages__: pandas, numpy, sklearn, scipy, matplotlib, seaborn, pickle
+* __Algorithms__: regression (logistic, multiple linear)
 * __Dataset Source__: https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling
 
 ## Datasets Information<br>
