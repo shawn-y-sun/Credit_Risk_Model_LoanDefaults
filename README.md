@@ -15,6 +15,8 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 [_**'loan_data_2015.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2015.csv) contains the current data we will implement the model to measure the risk
 [_**'loan_data_defaults.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_defaults.csv) contains only the past data of all defaulted loans
 
+_**Note**_: I embedded the findings and intepretations in the project-walkthrough below, and denoted them by ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+)
+
 ## [1. Data Preparation](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/1.Credit%20Risk%20Modeling_PD%20Data%20Preparation.ipynb)
 
 In this part of data pipeline, we fill in or convert the data into what we need, and then create and group dummy variables for each category as required for PD model and credit scorecard building.
@@ -478,7 +480,7 @@ Out[61]:
 0.4044162099872961
 ```
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.<br>
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve is upward further apart from the diagnoal line and the model has satisfactory predictive power.
 
 
@@ -506,9 +508,94 @@ KS
 Out[63]:
 0.2966746932223847
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.<br>
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The two cumulative distribution functions are sufficiently far away from each other and the model has satisfactory predictive power.
 
-### Credit Scorecard Building
+### Credit Scorecard Building ([Full Scorecard](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/df_scorecard.csv))
 
+#### Preprocessing the coefficient tables
+1. Add back the reference categories and assign them coefficients of 0
+2. Determine original feature name for each sub feature
+3. Determine the minimum and maximum coefficients for each original feature name
+4. Calculate the sum of minimum and maximum coefficients to determine the weight for lowest and highest possible weight a borrower could have
+
+#### Convert Coefficients to FICO Scores
+To calculate the score for each feature<br>
+![image](https://user-images.githubusercontent.com/77659538/110462984-54f70e80-810c-11eb-8555-0953fd44ac12.png)
+
+To calculate the score for the intercept<br>
+![image](https://user-images.githubusercontent.com/77659538/110463011-5a545900-810c-11eb-9de3-054e8ab56d3d.png)
+
+
+#### Findings on Scorecard
+If we rank the scorecard by scores<br>
+|    | Feature name             | Score - Final |
+|----|--------------------------|---------------|
+| 0  | Intercept                | 313           |
+| 1  | grade:A                  | 87            |
+| 35 | mths_since_issue_d:<38   | 84            |
+| 2  | grade:B                  | 68            |
+| 36 | mths_since_issue_d:38-39 | 68            |
+
+|    | Feature name                        | Score - Final |
+|----|-------------------------------------|---------------|
+| 41 | mths_since_issue_d:65-84            | -6            |
+| 55 | annual_inc:20K-30K                  | -6            |
+| 23 | verification_status:Source Verified | -1            |
+| 56 | annual_inc:30K-40K                  | -1            |
+| 85 | grade:G                             | 0             |
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) A external rating of A adds most value to a borrower's credit score, followed by if the months since issue date is fewer than 38 days. <br>
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) A person's credit score can be most negatively impacted if his annual income is between 20K and 30K and the loan has been issued for 65-84 months
+
+
+Then we look at some features in detail, we begin with annual income<br>
+| Feature name         | Score - Final |
+|----------------------|---------------|
+| annual_inc:120K-140K | 43            |
+| annual_inc:>140K     | 38            |
+| annual_inc:100K-120K | 36            |
+| annual_inc:90K-100K  | 30            |
+| annual_inc:80K-90K   | 28            |
+| annual_inc:70K-80K   | 22            |
+| annual_inc:60K-70K   | 17            |
+| annual_inc:50K-60K   | 11            |
+| annual_inc:40K-50K   | 6             |
+| annual_inc:<20K      | 0             |
+| annual_inc:30K-40K   | -1            |
+| annual_inc:20K-30K   | -6            |
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Not surprisingly, scores are positively related with annual income and each level of income does differentiates the score by a lot
+
+Then look at which state the borrower lives<br>
+| Feature name                    | Score - Final |
+|---------------------------------|---------------|
+| addr_state:WV_NH_WY_DC_ME_ID    | 40            |
+| addr_state:KS_SC_CO_VT_AK_MS    | 25            |
+| addr_state:IL_CT                | 20            |
+| addr_state:WI_MT                | 18            |
+| addr_state:TX                   | 17            |
+| addr_state:GA_WA_OR             | 14            |
+| addr_state:AR_MI_PA_OH_MN       | 10            |
+| addr_state:RI_MA_DE_SD_IN       | 8             |
+| addr_state:UT_KY_AZ_NJ          | 6             |
+| addr_state:CA                   | 5             |
+| addr_state:NY                   | 4             |
+| addr_state:OK_TN_MO_LA_MD_NC    | 4             |
+| addr_state:NM_VA                | 3             |
+| addr_state:ND_NE_IA_NV_FL_HI_AL | 0             |
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Where a person lives is also a differentiator: borrowers living in West Virginia, New Hampshire, Wyoming, DC, Maine, Idaho are much more likely to have a higher credit score than borrowers living in other states. But considering the population of these states are relatively smaller and thus having a smaller number of observations in our dataset, there might be some bias.
+
+Finally, we look at employment length<br>
+| Feature name   | Score - Final |
+|----------------|---------------|
+| emp_length:2-4 | 10            |
+| emp_length:10  | 10            |
+| emp_length:1   | 8             |
+| emp_length:5-6 | 7             |
+| emp_length:7-9 | 5             |
+| emp_length:0   | 0             |
+
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Surprisingly, looks like employment is negatively related to a person's credit score. It is possibly because a young worker does not have debt and spending on family, thus they face less financial stress and have a smaller chance to default on loans. Another reason could be fewer young workers have been approved a loan thus we don't have their data.
 
