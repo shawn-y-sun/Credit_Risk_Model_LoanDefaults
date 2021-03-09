@@ -15,6 +15,8 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 [_**'loan_data_2015.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2015.csv) contains the current data we will implement the model to measure the risk
 [_**'loan_data_defaults.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_defaults.csv) contains only the past data of all defaulted loans
 
+
+
 _**Note**_: I embedded the findings and intepretations in the project-walkthrough below, and denoted them by ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+)
 
 ## [1. Data Preparation](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/1.Credit%20Risk%20Modeling_PD%20Data%20Preparation.ipynb)
@@ -597,5 +599,10 @@ Finally, we look at employment length<br>
 | emp_length:7-9 | 5             |
 | emp_length:0   | 0             |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Surprisingly, looks like employment is negatively related to a person's credit score. It is possibly because a young worker does not have debt and spending on family, thus they face less financial stress and have a smaller chance to default on loans. Another reason could be fewer young workers have been approved a loan thus we don't have their data.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Surprisingly, looks like employment length is negatively related to a person's credit score. It is possibly because a young worker does not have debt and spending on family, thus they face less financial stress and have a smaller chance to default on loans. Another reason could be that fewer young workers have been approved a loan thus we don't have enough of their data.
 
+
+## [3. PD Model Monitoring](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/3.Credit%20Risk%20Modeling_PD%20Model%20Monitoring.ipynb)
+This part will assess if the PD model is out-of-date and needs to be re-trained by the newest dataset. We use PSI (Population Stability Index) to measure how much the variables has shifted over time. A high PSI indicates that the overall characteristics of borrowers have changed, meaning our model might not fit the new population as well as before, therefore it needs to be updated.
+
+## [4. LGD & EAD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/4.Credit%20Risk%20Modeling_LGD%20%26%20EAD%20Model.ipynb)
