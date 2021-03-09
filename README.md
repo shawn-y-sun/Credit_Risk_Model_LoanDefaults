@@ -425,7 +425,7 @@ true_rate
 Out[50]:
 0.5857790836076648
 ```
-<span style="color:red">The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is equivalent to the probaility of random classifying. But the power still is not strong enough.</span>
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is equivalent to the probaility of random classifying. But the power still is not strong enough
 
 __ROC Curve and AUC__
 
@@ -444,4 +444,4 @@ AUROC
 Out[56]:
 0.702208104993648
 ```
-<span style="color:red"> The result implies our model has a 'fair' predicting power, not perfect but good enough to use </span>
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model has a 'fair' predicting power, not perfect but good enough to use
