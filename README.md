@@ -394,7 +394,7 @@ After running model on testing dataset, we get the following results
 |     263083    |     1                         |     0.940636            |
 |     165001    |     1                         |     0.968665            |
 
-<span style="color:red">'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)</span>
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) 'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
 
 
 __Confusion Matrix__
@@ -427,7 +427,7 @@ Out[50]:
 ```
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is equivalent to the probaility of random classifying. But the power still is not strong enough
 
-__ROC Curve and AUC__
+#### ROC Curve and AUC####
 
 We further assess the predicting power by plotting the true positive rate against the false positive rate at various threshold settings
 
@@ -445,3 +445,7 @@ Out[56]:
 0.702208104993648
 ```
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model has a 'fair' predicting power, not perfect but good enough to use
+
+
+
+
