@@ -44,6 +44,7 @@ loan_data['emp_length_int'] = pd.to_numeric(loan_data['emp_length_int'])
 # Transforms the values to numeric
 ```
 
+
 __Missing values__<br>
 Replace with appropriate values or 0
 ```
@@ -65,11 +66,13 @@ loan_data['emp_length_int'].fillna(0, inplace=True)
 # Other missing values = 0
 ```
 
+
 ### Creating Dummy Variables<br>
-For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard.
+For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard
+
 
 __Dependent variable__<br>
-We determine whether the loan is good (i.e. not defaulted) by looking at 'loan_status'. We assign a value of 1 if the loan is good, 0 if not.
+We determine whether the loan is good (i.e. not defaulted) by looking at 'loan_status'. We assign a value of 1 if the loan is good, 0 if not
 ```
 loan_data['good_bad'] = \
 np.where(loan_data['loan_status'].\
@@ -77,6 +80,7 @@ np.where(loan_data['loan_status'].\
                'Does not meet the credit policy. Status:Charged Off',
                'Late (31-120 days)']), 0, 1)
 ```
+
 
 __Discrete Categories__<br>
 ```
@@ -90,13 +94,14 @@ loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix
                      pd.get_dummies(loan_data['initial_list_status'], prefix = 'initial_list_status', prefix_sep = ':')] 
 ```
 
-### Grouping Dummy Variables<br>
+
+### Grouping Dummy Variables
 __Methodology: 'Weight of Evidence' and 'Information Value'__<br>
-- 'Weight of Evidence' shows to what extent an independent variable would predict a dependent variable, giving us an insight into how useful a given category of an independent variable is. 
+- 'Weight of Evidence' shows to what extent an independent variable would predict a dependent variable, giving us an insight into how useful a given category of an independent variable is
 
 WoE = ln(%good / %bad)
 
-- Similarly, 'Information Value', ranging from 0 to 1,  shows how much information the original independent variable brings with respect to explaining the dependent variable, helping to pre-select a few best predictors.
+- Similarly, 'Information Value', ranging from 0 to 1,  shows how much information the original independent variable brings with respect to explaining the dependent variable, helping to pre-select a few best predictors
 
 IV = Sum((%good - %bad) * WoE)
 
@@ -188,7 +193,7 @@ def plot_by_woe(df_WoE, rotation_of_x_axis_labels = 0):
 
 __Computing and Visualizing WoE__
 
-For discrete variables, we order them by WoE and set the category with the worst credit risk as a reference category.
+For discrete variables, we order them by WoE and set the category with the worst credit risk as a reference category
 
 |   | home_ownership | n_obs | prop_good | prop_n_obs | n_good | n_bad | prop_n_good | prop_n_bad | WoE       | diff_prop_good | diff_WoE | IV       |
 |---|----------------|-------|-----------|------------|--------|-------|-------------|------------|-----------|----------------|----------|----------|
@@ -201,7 +206,7 @@ For discrete variables, we order them by WoE and set the category with the worst
 ![image](https://user-images.githubusercontent.com/77659538/110436112-c88a2300-80ee-11eb-979c-958f33acc1ea.png)
 
 
-For continuous variables, we put them in a specifc number of bins.
+For continuous variables, we put them in a specifc number of bins and set the minimal bin as the reference category
 ```
 df_inputs_prepr['total_acc_factor'] = pd.cut(df_inputs_prepr['total_acc'], 50)
 df_temp = woe_ordered_continuous(df_inputs_prepr, 'total_acc_factor', df_targets_prepr)
@@ -279,6 +284,7 @@ df_targets_prepr = loan_data_targets_train
 #df_targets_prepr = loan_data_targets_test
 ```
 
+
 __After Grouping Dummies' Pipeline__
 
 We store the dataset with grouped dummies to a to_be_saved dataset
@@ -297,54 +303,81 @@ loan_data_inputs_test.to_csv('loan_data_inputs_test.csv')
 loan_data_targets_test.to_csv('loan_data_targets_test.csv')
 ```
 
-______________________________________________________________________
+## [2. PD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/2.Credit%20Risk%20Modeling_PD%20Model%20Building.ipynb)
+
+
 ### Model Building
-__Algorithm:__ Logistic Regression <br>
-__Outcome Variable:__ *loan_status* <br>
 
-### Model Evaluation
-__Confusion Matrix__
+__Excluding Features__
 
-| Predicted<br>Actual | 0     | 1        |
-|------------------|----------|----------|
-| 0                | 0.079072 | 0.030196 |
-| 1                | 0.384025 | 0.506707 |
+We exclude the reference categories in our model as we used dummy variables to represent all features, making the reference categories redundant
 
-True Rate = 0.5857790836076648
+__Choosing Logistic Regression__
 
+We select logistic regression as our model because the outcome variable has only two outcomes: good (1) or bad (0)
 
-__ROC Curve & AUC__<br>
-![image](https://user-images.githubusercontent.com/77659538/109492048-564d8900-7ac5-11eb-8ba7-321976cef573.png)<br>
-AUROC = 0.702208104993648
+__Building Logistic Regression with P-Values__
+```
+# As there is no built-in method to calcualte P values for 
+#  sklearn logistic regression
 
+# Build a Class to display p-values for logistic regression in sklearn.
 
-__Gini Coefficient & Kolmogorov-Smirnov__<br>
-![image](https://user-images.githubusercontent.com/77659538/109492110-6d8c7680-7ac5-11eb-9844-ad4ba43aee27.png)<br>
-Gini = 0.4044162099872961
+from sklearn import linear_model
+import scipy.stats as stat
 
-![image](https://user-images.githubusercontent.com/77659538/109492134-754c1b00-7ac5-11eb-9843-472ce812e8e1.png)<br>
-Kolmogorov-Smirnov = 0.2966746932223847
+class LogisticRegression_with_p_values:
+    
+    def __init__(self,*args,**kwargs):
+        self.model = linear_model.LogisticRegression(*args,**kwargs)
 
-### Model Monitoring
-Indicator: Population Stability Index (PSI)
+    def fit(self,X,y):
+        self.model.fit(X,y)
+        denom = (2.0 * (1.0 + np.cosh(self.model.decision_function(X))))
+        denom = np.tile(denom,(X.shape[1],1)).T
+        F_ij = np.dot((X / denom).T,X)
+        Cramer_Rao = np.linalg.inv(F_ij)
+        sigma_estimates = np.sqrt(np.diagonal(Cramer_Rao))
+        z_scores = self.model.coef_[0] / sigma_estimates
+        p_values = [stat.norm.sf(abs(x)) * 2 for x in z_scores]
+        self.coef_ = self.model.coef_
+        self.intercept_ = self.model.intercept_
+        self.p_values = p_values
+```
 
+__Selecting Features__
 
-## Loss Given Default Model (LGD)
-__Dataset:__ _'loan_data_defaults.csv'_ <br>
-__Outcome Variable:__ *recovery_rate* <br>
-__Algorithm:__ Logistic Regression (stage 1), Linear Regression (stage 2)
-  - Stage 1: determine if recovery rate is 0 or not
-  - Stage 2: if not 0, how much is the recovery rate
+We leave a group of features if one of the dummy variables has a p value smaller than 0.05, meaning it is a significant variable
 
-## Exposure at Default Model (EAD)
-__Dataset:__ _'loan_data_defaults.csv'_ <br>
-__Outcome Variable:__ *CCF* (credit conversion factor) <br>
-__Algorithm:__ Linear Regression
+__Training the Model with Selected Features__
+```
+reg2 = LogisticRegression_with_p_values()
+reg2.fit(inputs_train, loan_data_targets_train)
+```
 
-## Expected Loss (EL) and Conclusion
-* Combine the three models (PD, LGD, EDA) to get the expected loss
-* (EL / total loan amount) < 10% -> meet the requirement (credit risk is under control)
+We get the coefficients of each significant variable
 
+| Feature name | Coefficients                 | P Values  |          |
+|--------------|------------------------------|-----------|----------|
+| 0            | Intercept                    | -1.374036 | NaN      |
+| 1            | grade:A                      | 1.123662  | 3.23E-35 |
+| 2            | grade:B                      | 0.878918  | 4.28E-47 |
+| 3            | grade:C                      | 0.684796  | 6.71E-34 |
+| 4            | grade:D                      | 0.496923  | 1.35E-20 |
+| ...          | ...                          | ...       | ...      |
+| 80           | mths_since_last_record:3-20  | 0.440625  | 3.35E-04 |
+| 81           | mths_since_last_record:21-31 | 0.35071   | 1.83E-03 |
+| 82           | mths_since_last_record:32-80 | 0.502956  | 3.96E-09 |
+| 83           | mths_since_last_record:81-86 | 0.175839  | 8.60E-02 |
+| 84           | mths_since_last_record:>86   | 0.232707  | 5.71E-03 |
 
+Finally, we save the model
+```
+pickle.dump(reg2, open('pd_model.sav', 'wb'))
+```
 
+### Model Validation
+__Exlcuding Features__
+
+We remove the reference categories and insignificant features
 
