@@ -11,13 +11,13 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 * __Dataset Source__: https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling
 
 ## Datasets Information<br>
-[_**'loan_data_2007_2014.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2007_2014.csv) contains the past data of all loans that we use to train and test our model
-[_**'loan_data_2015.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2015.csv) contains the current data we will implement the model to measure the risk
+[_**'loan_data_2007_2014.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2007_2014.csv) contains the past data of all loans that we use to train and test our model<br>
+[_**'loan_data_2015.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_2015.csv) contains the current data we will implement the model to measure the risk<br>
 [_**'loan_data_defaults.csv'**_](https://www.kaggle.com/shawnysun/loan-data-for-credit-risk-modeling?select=loan_data_defaults.csv) contains only the past data of all defaulted loans
 
 
 
-_**Note**_: I embedded the findings and intepretations in the project-walkthrough below, and denoted them by ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+)
+_**Note**_: I embedded the findings and intepretations in the project-walkthrough below, and denoted them by 🔶
 
 ## [1. Data Preparation](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/1.Credit%20Risk%20Modeling_PD%20Data%20Preparation.ipynb)
 
@@ -400,7 +400,7 @@ After running model on testing dataset, we get the following results
 |     263083    |     1                         |     0.940636            |
 |     165001    |     1                         |     0.968665            |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) 'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
+🔶 'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
 
 
 #### Confusion Matrix
@@ -420,7 +420,7 @@ Then we can create the confusion matrix
 | 0                 | 0.079072 | 0.030196 |
 | 1                 | 0.384025 | 0.506707 |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) When we set the threshold at 0.9, it would reduce the number of defaults, but also the number of overall approved loans. It means we can avoid much of the credit risk but cannot reach the best potential to make money (~38% of borrowers will be mistakenly rejected).
+🔶 When we set the threshold at 0.9, it would reduce the number of defaults, but also the number of overall approved loans. It means we can avoid much of the credit risk but cannot reach the best potential to make money (~38% of borrowers will be mistakenly rejected).
 
 ```
 In [50]:
@@ -432,7 +432,7 @@ true_rate
 Out[50]:
 0.5857790836076648
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is the accuracy of predicting by chance. But the power still is not strong enough. However, if we set the threshold at different levels, the accuracy will vary accordingly. Thus we need other measures to evaluate our model.
+🔶 The result implies our model can correctly classify ~59% of borrowers when we set threshold at 0.9. It means our model has some predicting power since the it is greater than 50%, which is the accuracy of predicting by chance. But the power still is not strong enough. However, if we set the threshold at different levels, the accuracy will vary accordingly. Thus we need other measures to evaluate our model.
 
 #### ROC Curve and AUC
 
@@ -441,7 +441,7 @@ We further assess the predicting power by plotting the true positive rate agains
 ROC plot<br>
 ![image](https://user-images.githubusercontent.com/77659538/110450038-c7142700-80fd-11eb-945b-271244e47843.png)
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Each point from the curve represents a different confusion matrix based on a different threshold. In specific, it is equal to (True positive rate / False positive rate)
+🔶 Each point from the curve represents a different confusion matrix based on a different threshold. In specific, it is equal to (True positive rate / False positive rate)
 
 We compute the area under ROC (AUROC)<br>
 ```
@@ -453,7 +453,7 @@ AUROC
 Out[56]:
 0.702208104993648
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The result implies our model has a 'fair' predicting power, not perfect but good enough to use.
+🔶 The result implies our model has a 'fair' predicting power, not perfect but good enough to use.
 
 
 #### Gini and Kolmogorov-Smirnov
@@ -482,8 +482,8 @@ Out[61]:
 0.4044162099872961
 ```
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.<br>
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The curve is upward further apart from the diagnoal line and the model has satisfactory predictive power.
+🔶 The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.<br>
+🔶 The curve is upward further apart from the diagnoal line and the model has satisfactory predictive power.
 
 
 Kolmogorov-Smirnov coefficient measures the maximum difference between the cumulative distribution functions of 'good' and 'bad' borrowers. 
@@ -510,8 +510,8 @@ KS
 Out[63]:
 0.2966746932223847
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.<br>
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The two cumulative distribution functions are sufficiently far away from each other and the model has satisfactory predictive power.
+🔶 The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.<br>
+🔶 The two cumulative distribution functions are sufficiently far away from each other and the model has satisfactory predictive power.
 
 ### Credit Scorecard Building ([Full Scorecard](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/df_scorecard.csv))
 
@@ -547,8 +547,8 @@ If we rank the scorecard by scores<br>
 | 56 | annual_inc:30K-40K                  | -1            |
 | 85 | grade:G                             | 0             |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) A external rating of A adds most value to a borrower's credit score, followed by if the months since issue date is fewer than 38 days. <br>
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) A person's credit score can be most negatively impacted if his annual income is between 20K and 30K and the loan has been issued for 65-84 months
+🔶 A external rating of A adds most value to a borrower's credit score, followed by if the months since issue date is fewer than 38 days. <br>
+🔶 A person's credit score can be most negatively impacted if his annual income is between 20K and 30K and the loan has been issued for 65-84 months
 
 
 Then we look at some features in detail, we begin with annual income<br>
@@ -567,7 +567,7 @@ Then we look at some features in detail, we begin with annual income<br>
 | annual_inc:30K-40K   | -1            |
 | annual_inc:20K-30K   | -6            |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Not surprisingly, scores are positively related with annual income and each level of income does differentiates the score by a lot
+🔶 Not surprisingly, scores are positively related with annual income and each level of income does differentiates the score by a lot
 
 Then look at which state the borrower lives<br>
 | Feature name                    | Score - Final |
@@ -587,7 +587,7 @@ Then look at which state the borrower lives<br>
 | addr_state:NM_VA                | 3             |
 | addr_state:ND_NE_IA_NV_FL_HI_AL | 0             |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Where a person lives is also a differentiator: borrowers living in West Virginia, New Hampshire, Wyoming, DC, Maine, Idaho are much more likely to have a higher credit score than borrowers living in other states. But considering the population of these states are relatively smaller and thus having a smaller number of observations in our dataset, there might be some bias.
+🔶 Where a person lives is also a differentiator: borrowers living in West Virginia, New Hampshire, Wyoming, DC, Maine, Idaho are much more likely to have a higher credit score than borrowers living in other states. But considering the population of these states are relatively smaller and thus having a smaller number of observations in our dataset, there might be some bias.
 
 Finally, we look at employment length<br>
 | Feature name   | Score - Final |
@@ -599,7 +599,7 @@ Finally, we look at employment length<br>
 | emp_length:7-9 | 5             |
 | emp_length:0   | 0             |
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) Surprisingly, looks like employment length is negatively related to a person's credit score. It is possibly because a young worker does not have debt and spending on family, thus they face less financial stress and have a smaller chance to default on loans. Another reason could be that fewer young workers have been approved a loan thus we don't have enough of their data.
+🔶 Surprisingly, looks like employment length is negatively related to a person's credit score. It is possibly because a young worker does not have debt and spending on family, thus they face less financial stress and have a smaller chance to default on loans. Another reason could be that fewer young workers have been approved a loan thus we don't have enough of their data.
 
 
 ## [3. PD Model Monitoring](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/3.Credit%20Risk%20Modeling_PD%20Model%20Monitoring.ipynb)
@@ -617,4 +617,4 @@ ratio_EL
 Out[109]:
 0.07526562017218118
 ```
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The ratio of expected loss over total funded amount is 7.5%, which is a acceptable level and means our credit risk is under control!
+🔶 The ratio of expected loss over total funded amount is 7.5%, which is a acceptable level and means our credit risk is under control!
