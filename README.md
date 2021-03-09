@@ -23,7 +23,7 @@ _**Note**_: I embedded the findings and intepretations in the project-walkthroug
 
 In this part of data pipeline, we fill in or convert the data into what we need, and then create and group dummy variables for each category as required for PD model and credit scorecard building.
 
-### Preprocessing Data
+### 1.1 Preprocessing Data
 __Continuous variables__<br>
 Convert the date string values to numeric values of days or months until today
 - 'emp_length'
@@ -71,7 +71,7 @@ loan_data['emp_length_int'].fillna(0, inplace=True)
 ```
 
 
-### Creating Dummy Variables<br>
+### 1.2 Creating Dummy Variables<br>
 For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard
 
 
@@ -99,7 +99,7 @@ loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix
 ```
 
 
-### Grouping Dummy Variables
+### 1.3 Grouping Dummy Variables
 #### Methodology: 'Weight of Evidence' and 'Information Value'
 - 'Weight of Evidence' shows to what extent an independent variable would predict a dependent variable, giving us an insight into how useful a given category of an independent variable is
 
@@ -258,7 +258,7 @@ df_inputs_prepr['total_acc:>=52'] = \
 np.where((df_inputs_prepr['total_acc'] >= 52), 1, 0)
 ```
 
-### Create and Export Train and Test Datasets
+### 1.4 Create and Export Train and Test Datasets
 
 #### Before Grouping Dummies' Pipeline
 
@@ -309,7 +309,7 @@ loan_data_targets_test.to_csv('loan_data_targets_test.csv')
 ## [2. PD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/2.Credit%20Risk%20Modeling_PD%20Model%20Building.ipynb)
 
 
-### Model Building
+### 2.1 Model Building
 We will trian and fit statistical model to predict a borrower's probability of being good 
 
 #### Excluding Features
@@ -380,7 +380,7 @@ Finally, we save the model
 pickle.dump(reg2, open('pd_model.sav', 'wb'))
 ```
 
-### Model Evaluation
+### 2.2 Model Evaluation
 We will apply the model on our testing dataset and use different measures to assess how accurate our model is, to know to what extent the outcome of interest can be explained by the available information.
 
 #### Excluding Features
@@ -513,7 +513,7 @@ Out[63]:
 🔶 The plot demonstrates the percentage of bad or good borrowers will be rejected at various threshold settings. For example, if we set threshold at 0.8, ~25% of the bad borrowers will be rejected while only ~10% of good borrowers will be rejected.<br>
 🔶 The two cumulative distribution functions are sufficiently far away from each other and the model has satisfactory predictive power.
 
-### Credit Scorecard Building ([Full Scorecard](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/df_scorecard.csv))
+### 2.3 Credit Scorecard Building ([Full Scorecard](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/df_scorecard.csv))
 
 #### Preprocessing the coefficient tables
 1. Add back the reference categories and assign them coefficients of 0
