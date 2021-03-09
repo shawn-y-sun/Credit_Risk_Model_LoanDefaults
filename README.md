@@ -606,3 +606,15 @@ Finally, we look at employment length<br>
 This part will assess if the PD model is out-of-date and needs to be re-trained by the newest dataset. We use PSI (Population Stability Index) to measure how much the variables has shifted over time. A high PSI indicates that the overall characteristics of borrowers have changed, meaning our model might not fit the new population as well as before, therefore it needs to be updated.
 
 ## [4. LGD & EAD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/4.Credit%20Risk%20Modeling_LGD%20%26%20EAD%20Model.ipynb)
+In this part, we choose appropriate statistical models (linear/logistic regression) to train the LGD and EAD models, and we trained them using the dataset including only defaulted borrowers. The data preprocessing and model building approaches are quite similar to what we have done in PD Model.
+
+Finally, we combined three models (PD, LGD, and EAD) together to calculate the expected loss. 
+```
+In [109]:
+ratio_EL = total_EL / total_funded
+ratio_EL
+
+Out[109]:
+0.07526562017218118
+```
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) The ratio of expected loss over total funded amount is 7.5%, which is a acceptable level and means our credit risk is under control!
