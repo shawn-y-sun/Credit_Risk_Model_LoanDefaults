@@ -377,7 +377,49 @@ pickle.dump(reg2, open('pd_model.sav', 'wb'))
 ```
 
 ### Model Validation
-__Exlcuding Features__
+__Excluding Features__
 
 We remove the reference categories and insignificant features
 
+__Testing Model__
+
+After running model on testing dataset, we get the following results
+
+|               |     loan_data_targets_test    |     y_hat_test_proba    |
+|---------------|-------------------------------|-------------------------|
+|     362514    |     1                         |     0.924306            |
+|     288564    |     1                         |     0.849239            |
+|     213591    |     1                         |     0.885349            |
+|     263083    |     1                         |     0.940636            |
+|     165001    |     1                         |     0.968665            |
+
+'y_hat_test_proba': it tells a borrower's probability of being a good borrower (won't default)
+
+__Confusion Matrix__
+
+We set the threshold at 0.9, meaning the borrower is predicted to a good borrower if the y_hat_test_proba >= 0.9
+```
+tr = 0.9
+df_actual_predicted_probs['y_hat_test'] = \
+np.where(df_actual_predicted_probs['y_hat_test_proba'] >= tr, 1,0)
+```
+
+
+Then we can create the confusion matrix
+
+| Predicted/ Actual | 0        | 1        |
+|-------------------|----------|----------|
+| 0                 | 0.079072 | 0.030196 |
+| 1                 | 0.384025 | 0.506707 |
+
+
+```
+In [50]:
+true_neg = confusion_matrix_per.iloc[0,0]
+true_pos = confusion_matrix_per.iloc[1,1]
+true_rate = true_neg + true_pos
+true_rate
+
+Out[50]:
+0.5857790836076648
+```
