@@ -17,6 +17,8 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 
 ## [1. Data Preparation](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/1.Credit%20Risk%20Modeling_PD%20Data%20Preparation.ipynb)
 
+In this part of data pipeline, we fill in or convert the data into what we need, and then create and group dummy variables for each category as required for PD model and credit scorecard building.
+
 ### Preprocessing Data
 __Continuous variables__<br>
 Convert the date string values to numeric values of days or months until today
@@ -63,7 +65,7 @@ loan_data['emp_length_int'].fillna(0, inplace=True)
 # Other missing values = 0
 ```
 
-### Creating Dummy Variables <br>
+### Creating Dummy Variables<br>
 For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard.
 
 __Dependent variable__<br>
@@ -88,9 +90,8 @@ loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix
                      pd.get_dummies(loan_data['initial_list_status'], prefix = 'initial_list_status', prefix_sep = ':')] 
 ```
 
-### Calculating 'Weight of Evidence' and 'Information Value'<br>
+### Grouping Dummy Variables<br>
 __Methodology: 'Weight of Evidence' and 'Information Value'__<br>
-We calculate 'Weight of Evidence' and 'Information Value' 
 - 'Weight of Evidence' shows to what extent an independent variable would predict a dependent variable, giving us an insight into how useful a given category of an independent variable is. 
 
 WoE = ln(%good / %bad)
@@ -107,7 +108,9 @@ IV = Sum((%good - %bad) * WoE)
 | 0.3 < IV < 0.5  | Strong power                            |
 | 0.5 < IV        | Suspisciously high, too good to be true |
 
+
 __Creating WoE and Visulization Function__
+
 ```
 # WoE function for discrete unordered variables
 def woe_discrete(df, discrete_variabe_name, good_bad_variable_df):
@@ -182,7 +185,10 @@ def plot_by_woe(df_WoE, rotation_of_x_axis_labels = 0):
     # Rotates the labels of the x-axis a predefined number of degrees
 ```
 
+
 __Computing and Visualizing WoE__
+
+For discrete variables, we order them by WoE and set the category with the worst credit risk as a reference category.
 
 |   | home_ownership | n_obs | prop_good | prop_n_obs | n_good | n_bad | prop_n_good | prop_n_bad | WoE       | diff_prop_good | diff_WoE | IV       |
 |---|----------------|-------|-----------|------------|--------|-------|-------------|------------|-----------|----------------|----------|----------|
@@ -194,8 +200,30 @@ __Computing and Visualizing WoE__
 
 ![image](https://user-images.githubusercontent.com/77659538/110436112-c88a2300-80ee-11eb-979c-958f33acc1ea.png)
 
-__Combining Categories__<br>
-We set the category with the worst credit risk as a reference category, then combine the categories with similar WoE for to simplify our model.
+
+For continuous variables, we put them in a specifc number of bins.
+```
+df_inputs_prepr['total_acc_factor'] = pd.cut(df_inputs_prepr['total_acc'], 50)
+df_temp = woe_ordered_continuous(df_inputs_prepr, 'total_acc_factor', df_targets_prepr)
+df_temp.head()
+```
+
+|   | total_acc_factor | n_obs | prop_good | prop_n_obs | n_good | n_bad | prop_n_good | prop_n_bad | WoE       | diff_prop_good | diff_WoE | IV  |
+|---|------------------|-------|-----------|------------|--------|-------|-------------|------------|-----------|----------------|----------|-----|
+| 0 | (-0.156, 3.12]   | 125   | 0.776     | 0.00134    | 97     | 28    | 0.001168    | 0.002748   | -0.855734 | NaN            | NaN      | inf |
+| 1 | (3.12, 6.24]     | 1499  | 0.850567  | 0.016074   | 1275   | 224   | 0.015349    | 0.021982   | -0.359185 | 0.074567       | 0.496549 | inf |
+| 2 | (6.24, 9.36]     | 3715  | 0.871871  | 0.039836   | 3239   | 476   | 0.038993    | 0.046712   | -0.180639 | 0.021304       | 0.178547 | inf |
+| 3 | (9.36, 12.48]    | 6288  | 0.874841  | 0.067427   | 5501   | 787   | 0.066224    | 0.077233   | -0.153784 | 0.00297        | 0.026855 | inf |
+| 4 | (12.48, 15.6]    | 8289  | 0.888286  | 0.088883   | 7363   | 926   | 0.088639    | 0.090873   | -0.024892 | 0.013445       | 0.128892 | inf |
+
+
+__Grouping Categories__<br>
+
+We group the categories or bins by following features:
+- Small number of observations
+- Similar WoE
+- Outliers
+
 ```
 # 'OTHERS' and 'NONE' are riskiest but are very few
 # 'RENT' is the next riskiest.
@@ -212,24 +240,64 @@ sum([df_inputs_prepr['home_ownership:RENT'],
      df_inputs_prepr['home_ownership:ANY']])
 ```
 
+```
+# Categories: '<=27', '28-51', '>51'
+df_inputs_prepr['total_acc:<=27'] = \
+np.where((df_inputs_prepr['total_acc'] <= 27), 1, 0)
+df_inputs_prepr['total_acc:28-51'] = \
+np.where((df_inputs_prepr['total_acc'] >= 28) & (df_inputs_prepr['total_acc'] <= 51), 1, 0)
+df_inputs_prepr['total_acc:>=52'] = \
+np.where((df_inputs_prepr['total_acc'] >= 52), 1, 0)
+```
 
+### Create and Export Train and Test Datasets
 
+__Before Grouping Dummies' Pipeline__
 
-## Probability of Default Model (PD)
-### Data Cleaning
-Dataset: *'loan_data_2007_2014.csv'* <br>
-* Correct the invalid dates
-* Convert the relevant dates to useful number of days
-* Covert data strings to numerical values
-* Fill the missing values
+We first split the dataset into training and testing parts
+```
+loan_data_inputs_train, loan_data_inputs_test, \
+loan_data_targets_train, loan_data_targets_test = \
+train_test_split(loan_data.drop('good_bad', axis = 1), \
+                 loan_data['good_bad'], test_size = 0.2, random_state = 42)
+# Split two dataframes with inputs and targets, 
+#   each into a train and test dataframe, and store them in variables.
+# Set the size of the test dataset to be 20%.
 
-### Data Preparation
-* Create dummy variables
-* Determine the Weight of Evidence (WoE)
-* For categorical variables, order them by WoE
-* For continuous variables, group adjacent duummy variables based on WoE
-* Remove the reference variable
+# Set a specific random state.
+#  Allow us to perform the exact same split multimple times.
+#  To assign the exact same observations to the train and test datasets.
+```
 
+We assign the train or test datasets to the 'Grouping Dummies' pipeline
+```
+#####
+df_inputs_prepr = loan_data_inputs_train
+df_targets_prepr = loan_data_targets_train
+#####
+#df_inputs_prepr = loan_data_inputs_test
+#df_targets_prepr = loan_data_targets_test
+```
+
+__After Grouping Dummies' Pipeline__
+
+We store the dataset with grouped dummies to a to_be_saved dataset
+```
+#####
+loan_data_inputs_train = df_inputs_prepr
+#####
+#loan_data_inputs_test = df_inputs_prepr
+```
+
+We save the preprocessed datasets to CSV
+```
+loan_data_inputs_train.to_csv('loan_data_inputs_train.csv')
+loan_data_targets_train.to_csv('loan_data_targets_train.csv')
+loan_data_inputs_test.to_csv('loan_data_inputs_test.csv')
+loan_data_targets_test.to_csv('loan_data_targets_test.csv')
+```
+
+______________________________________________________________________
 ### Model Building
 __Algorithm:__ Logistic Regression <br>
 __Outcome Variable:__ *loan_status* <br>
