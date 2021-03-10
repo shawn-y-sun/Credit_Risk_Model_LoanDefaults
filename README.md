@@ -1,7 +1,7 @@
 # Credit Risk Modeling for Loan Defaults
 
 ## Project Overview
-This project aims to measure the credit risk of a lending institution (i.e. a commerical bank) by calculating the expected loss of the outstanding loans. Credit risk is the likelihood that a borrower would not repay their loan to the lender. By measuring the risk effectively, a lender could minimize its credit losses while it reaches the fullest potential to maximize revenues on loan borrowing. It is also crucial for banks to abide by regulations that require them to conduct their business with sufficent capital adequacy, which, if in low, will risk the stability of the economic system.
+This project aims to measure the credit risk of a lending institution (i.e. a commercial bank) by calculating the expected loss of the outstanding loans. Credit risk is the likelihood that a borrower would not repay their loan to the lender. By measuring the risk effectively, a lender could minimize its credit losses while it reaches the fullest potential to maximize revenues on loan borrowing. It is also crucial for banks to abide by regulations that require them to conduct their business with sufficient capital adequacy, which, if in low, will risk the stability of the economic system.
 
 The key metric of credit risk is Expected Loss (EL), calculated by multiplying the results across three models: PD (Probability of Default), LGD (Loss Given Default), and EAD (Exposure at Default). The project includes all three models to help reach the final goal of credit risk measurement.
  
@@ -18,7 +18,7 @@ The key metric of credit risk is Expected Loss (EL), calculated by multiplying t
 
 
 
-_**Note**_: I embedded the findings and intepretations in the project-walkthrough below, and denoted them by 🔶
+_**Note**_: I embedded the findings and interpretations in the project-walkthrough below, and denoted them by 🔶
 
 ## [1. Data Preparation](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/1.Credit%20Risk%20Modeling_PD%20Data%20Preparation.ipynb)
 
@@ -73,7 +73,7 @@ loan_data['emp_length_int'].fillna(0, inplace=True)
 
 
 ### 1.2 Creating Dummy Variables<br>
-For PD Model, We create dummy variables according to regulations to make the model easily understood and create credit scorecard
+For PD Model, we create dummy variables according to regulations to make the model easily understood and create credit scorecard
 
 
 #### Dependent variable
@@ -106,7 +106,7 @@ loan_data_dummies = [pd.get_dummies(loan_data['grade'], prefix = 'grade', prefix
 
 WoE = ln(%good / %bad)
 
-- Similarly, 'Information Value', ranging from 0 to 1,  shows how much information the original independent variable brings with respect to explaining the dependent variable, helping to pre-select a few best predictors
+- Similarly, 'Information Value', ranging from 0 to 1, shows how much information the original independent variable brings with respect to explaining the dependent variable, helping to pre-select a few best predictors
 
 IV = Sum((%good - %bad) * WoE)
 
@@ -116,10 +116,10 @@ IV = Sum((%good - %bad) * WoE)
 | 0.02 < IV < 0.1 | Weak power                              |
 | 0.1 < IV < 0.3  | Medium power                            |
 | 0.3 < IV < 0.5  | Strong power                            |
-| 0.5 < IV        | Suspisciously high, too good to be true |
+| 0.5 < IV        | Suspiciously high, too good to be true |
 
 
-#### Creating WoE and Visulization Function
+#### Creating WoE and Visualization Function
 ```
 # WoE function for discrete unordered variables
 def woe_discrete(df, discrete_variabe_name, good_bad_variable_df):
@@ -210,7 +210,7 @@ For discrete variables, we order them by WoE and set the category with the worst
 ![image](https://user-images.githubusercontent.com/77659538/110436112-c88a2300-80ee-11eb-979c-958f33acc1ea.png)
 
 
-For continuous variables, we put them in a specifc number of bins and set the minimal bin as the reference category
+For continuous variables, we put them in a specific number of bins and set the minimal bin as the reference category
 ```
 df_inputs_prepr['total_acc_factor'] = pd.cut(df_inputs_prepr['total_acc'], 50)
 df_temp = woe_ordered_continuous(df_inputs_prepr, 'total_acc_factor', df_targets_prepr)
@@ -274,7 +274,7 @@ train_test_split(loan_data.drop('good_bad', axis = 1), \
 # Set the size of the test dataset to be 20%.
 
 # Set a specific random state.
-#  Allow us to perform the exact same split multimple times.
+#  Allow us to perform the exact same split multiple times.
 #  To assign the exact same observations to the train and test datasets.
 ```
 
@@ -291,7 +291,7 @@ df_targets_prepr = loan_data_targets_train
 
 #### After Grouping Dummies' Pipeline
 
-We store the dataset with grouped dummies to a to_be_saved dataset
+We store the dataset with grouped dummies in a to-be-saved dataset
 ```
 #####
 loan_data_inputs_train = df_inputs_prepr
@@ -323,7 +323,7 @@ We select logistic regression as our model because the outcome variable has only
 
 #### Building Logistic Regression with P-Values
 ```
-# As there is no built-in method to calcualte P values for 
+# As there is no built-in method to calculate P values for 
 #  sklearn logistic regression
 
 # Build a Class to display p-values for logistic regression in sklearn.
@@ -352,7 +352,7 @@ class LogisticRegression_with_p_values:
 
 #### Selecting Features
 
-We leave a group of features if one of the dummy variables has a p value smaller than 0.05, meaning it is a significant variable
+We leave a group of features if one of the dummy variables has a p value smaller than 0.05, meaning it is a significant variable.
 
 #### Training the Model with Selected Features
 ```
@@ -459,7 +459,7 @@ Out[56]:
 
 #### Gini and Kolmogorov-Smirnov
 
-Gini coefficient measures the ineqaulity between good borrowers and bad borrowers in a population.
+Gini coefficient measures the inequality between good borrowers and bad borrowers in a population.
 
 ```
 plt.plot(df_actual_predicted_probs['Cumulative Perc Population'],
@@ -484,7 +484,7 @@ Out[61]:
 ```
 
 🔶 The curve demonstrates the model's accuracy of recognizing bad borrowers as the threshold increased and more borrowers are rejected. For example, when we reject 20% of the borrowers based on our model, about 40% of the bad borrowers will be rejected, meaning we have a higher predicting power by rejecting them by chance.<br>
-🔶 The curve is upward further apart from the diagnoal line and the model has satisfactory predictive power.
+🔶 The curve is upward further apart from the diagonal line and the model has satisfactory predictive power.
 
 
 Kolmogorov-Smirnov coefficient measures the maximum difference between the cumulative distribution functions of 'good' and 'bad' borrowers. 
@@ -588,7 +588,7 @@ Then look at which state the borrower lives<br>
 | addr_state:NM_VA                | 3             |
 | addr_state:ND_NE_IA_NV_FL_HI_AL | 0             |
 
-🔶 Where a person lives is also a differentiator: borrowers living in West Virginia, New Hampshire, Wyoming, DC, Maine, Idaho are much more likely to have a higher credit score than borrowers living in other states. But considering the population of these states are relatively smaller and thus having a smaller number of observations in our dataset, there might be some bias.
+🔶 Where a person lives is also a differentiator: borrowers living in West Virginia, New Hampshire, Wyoming, DC, Maine, Idaho are much more likely to have a higher credit score than borrowers living in other states. But considering the population of these states are relatively smaller and thus have a smaller number of observations in our dataset, there might be some bias.
 
 Finally, we look at employment length<br>
 | Feature name   | Score - Final |
@@ -618,4 +618,4 @@ ratio_EL
 Out[109]:
 0.07526562017218118
 ```
-🔶 The ratio of expected loss over total funded amount is 7.5%, which is a acceptable level and means our credit risk is under control!
+🔶 The ratio of expected loss over total funded amount is 7.5%, which is an acceptable level and means our credit risk is under control!
