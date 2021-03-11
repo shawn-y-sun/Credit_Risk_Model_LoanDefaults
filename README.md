@@ -210,7 +210,7 @@ For discrete variables, we order them by WoE and set the category with the worst
 ![image](https://user-images.githubusercontent.com/77659538/110436112-c88a2300-80ee-11eb-979c-958f33acc1ea.png)
 
 
-For continuous variables, we put them in a specific number of bins and set the minimal bin as the reference category
+For continuous variables, we put them in bins of same size (fine classing) and set the minimal bin as the reference category
 ```
 df_inputs_prepr['total_acc_factor'] = pd.cut(df_inputs_prepr['total_acc'], 50)
 df_temp = woe_ordered_continuous(df_inputs_prepr, 'total_acc_factor', df_targets_prepr)
