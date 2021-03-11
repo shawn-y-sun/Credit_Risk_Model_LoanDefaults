@@ -376,6 +376,9 @@ We get the coefficients of each significant variable
 | 83           | mths_since_last_record:81-86 | 0.175839  | 8.60E-02 |
 | 84           | mths_since_last_record:>86   | 0.232707  | 5.71E-03 |
 
+🔶 Interpretation of the coefficients β: the odds for someone being a good borrower is e^(β) times higher than the odds for someone with the reference feature<br>
+(Note: direct comparison are possible only between categories coming from one and the same original independent variable)
+
 Finally, we save the model
 ```
 pickle.dump(reg2, open('pd_model.sav', 'wb'))
