@@ -838,7 +838,7 @@ Distribution of residuals<br>
 # Plot the distribution of the residuals.
 sns.distplot(lgd_targets_stage_2_test - y_hat_test_lgd_stage_2)
 ```
-![image](https://user-images.githubusercontent.com/77659538/111420180-b713cd00-8725-11eb-95ec-40e1cfe2f5c6.png)
+![image](https://user-images.githubusercontent.com/77659538/111421251-a49a9300-8727-11eb-8d5b-b55c31e06b94.png)
 
 🔶 The shape resembling a normal distribution and has a mean of 0, and 0 is where most of them are concentrated, indicating a satisfactory level of predicting power
 
