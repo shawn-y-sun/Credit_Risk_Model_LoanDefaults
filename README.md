@@ -726,6 +726,136 @@ Name: Contribution, dtype: float64
 ## [4. LGD & EAD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/4.Credit%20Risk%20Modeling_LGD%20%26%20EAD%20Model.ipynb)
 In this part, we choose appropriate statistical models (linear/logistic regression) to train the LGD and EAD models, and we trained them using the dataset including only defaulted borrowers. The data preprocessing and model building approaches are quite similar to what we have done in PD Model.
 
+### 4.1 Data Preparation
+For LGD and EDA models, we only model on the data records of defaults since these stages are only taken into consideration when a borrower has defaulted.
+
+### 4.2 Dependent Variables
+#### LGD
+Dependent variables: recovery rate = recoveries / funded amount
+```
+In [10]:
+# The dependent variable for the LGD model: recovery rate
+# = the ratio of recoveries and funded amount
+loan_data_defaults['recovery_rate'] = \
+loan_data_defaults['recoveries'] / loan_data_defaults['funded_amnt']
+loan_data_defaults['recovery_rate'].describe()
+
+```
+
+#### EAD
+Dependent variables: credit conversion factor (CCF) = (funded amount - received principal) / funded amount
+```
+In [12]:
+# The dependent variable for the EAD model: credit conversion factor.
+# =the ratio of the difference of the amount 
+#  used at the moment of default to the total funded amount.
+loan_data_defaults['CCF'] = \
+(loan_data_defaults['funded_amnt'] - loan_data_defaults['total_rec_prncp'])\
+/ loan_data_defaults['funded_amnt']
+loan_data_defaults['CCF'].describe()
+```
+
+#### Explore
+LGD: recovery rate <br>
+```
+plt.hist(loan_data_defaults['recovery_rate'], bins = 50);
+```
+![image](https://user-images.githubusercontent.com/77659538/111417782-829e1200-8721-11eb-9dcf-9aa13ae2b7bb.png)
+
+🔶 Most borrowers have a recovery rate of 0, therefore we further create dummy to indicate whether it is 0
+```
+# Create new variable which is 0 if recovery rate is 0 and 1 otherwise
+loan_data_defaults['recovery_rate_0_1'] = \
+np.where(loan_data_defaults['recovery_rate'] == 0, 0, 1)
+```
+
+EAD: CCF <br>
+```
+plt.hist(loan_data_defaults['CCF'], bins = 100);
+```
+![image](https://user-images.githubusercontent.com/77659538/111417841-977aa580-8721-11eb-9f9b-0e5521875422.png)
+
+### 4.3 LGD Model Building
+#### Stage 1: Logistic Regression
+Goal: predict if the borrower has a recovery rate greater than 0
+- Split the data into train and test
+- Keep only variables needed
+- Train the model
+
+Model Evaluation:<br>
+Confustion Matrix
+```
+In [40]:
+cf_mtx_perc = cf_mtx / df_actual_predicted_probs.shape[0]
+cf_mtx_perc
+
+Out[40]:
+Predicted	0	1
+Actual		
+0	0.118062	0.316952
+1	0.076896	0.488090
+
+In [41]:
+# Calculate Accuracy of the model
+acc_rate = cf_mtx_perc.iloc[0,0] + cf_mtx_perc.iloc[1,1]
+acc_rate
+
+Out[41]:
+0.6061517113783533
+```
+ROC Curve<br>
+
+
+```
+In [45]:
+AUROC = roc_auc_score(df_actual_predicted_probs['lgd_targets_stage_1_test'], 
+                      df_actual_predicted_probs['y_hat_test_proba_lgd_stage_1'])
+AUROC
+Out[45]:
+0.6511244247633932
+```
+🔶 Our model has a fair predicting power
+
+#### Stage 2: Linear Regression
+Goal: estimate how much exactly is the recovery rate
+
+Model Evaluation:<br>
+Correlation between actual and predicted values<br>
+```
+In [59]:
+# Calculate the correlation between actual and predicted values.
+pd.concat([lgd_targets_stage_2_test_temp, pd.DataFrame(y_hat_test_lgd_stage_2)], axis = 1).corr()
+
+Out[59]:
+recovery_rate	0
+recovery_rate	1.000000	0.307996
+0	0.307996	1.000000
+```
+
+Distribution of residuals<br>
+```
+# Plot the distribution of the residuals.
+sns.distplot(lgd_targets_stage_2_test - y_hat_test_lgd_stage_2)
+```
+
+
+#### Combining Stage 1 and Stage 2
+```
+In [62]:
+# Include all records
+y_hat_test_lgd_stage_2_all = reg_lgd_st_2.predict(lgd_inputs_stage_1_test)
+
+In [63]:
+y_hat_test_lgd = y_hat_test_lgd_stage_1 * y_hat_test_lgd_stage_2_all
+# Combine the predictions of the models from the two stages
+y_hat_test_lgd
+
+Out[63]:
+array([0.1193906 , 0.09605635, 0.        , ..., 0.12078611, 0.11587422,
+       0.15667447])
+```
+
+### Calculating EL
 Finally, we combined three models (PD, LGD, and EAD) together to calculate the expected loss. 
 ```
 In [109]:
