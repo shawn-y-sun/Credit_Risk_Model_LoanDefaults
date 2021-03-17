@@ -610,6 +610,119 @@ Finally, we look at employment length<br>
 ## [3. PD Model Monitoring](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/3.Credit%20Risk%20Modeling_PD%20Model%20Monitoring.ipynb)
 This part will assess if the PD model is out-of-date and needs to be re-trained by the newest dataset. We use PSI (Population Stability Index) to measure how much the variables has shifted over time. A high PSI indicates that the overall characteristics of borrowers have changed, meaning our model might not fit the new population as well as before, therefore it needs to be updated.
 
+### 3.1 Preprocessing New Data
+This part of code is same as that in 'Data Preparation' section with minor adjustment, preprocessing the data in similar way.
+
+### 3.2 Grouping Old and New Data with Respective Intervals
+#### Calcuate Individual Credit Scores
+Old data:
+```
+In [169]:
+# Calculate the credit scores of new df
+scorecard_scores = df_scorecard['Score - Final']
+scorecard_scores = scorecard_scores.values.reshape(102, 1)
+y_scores_train = inputs_train_with_ref_cat_w_intercept.dot(scorecard_scores)
+y_scores_train.head()
+
+Out[169]:
+0
+427211	689.0
+206088	596.0
+136020	669.0
+412305	526.0
+36159	527.0
+```
+New data:
+```
+In [170]:
+y_scores_2015 = inputs_2015_with_ref_cat_w_intercept.dot(scorecard_scores)
+y_scores_2015.head()
+Out[170]:
+0
+0	747.0
+1	755.0
+2	635.0
+3	623.0
+4	701.0
+```
+
+#### Create dummy variables for score intervals (of 50)
+```
+inputs_train_with_ref_cat_w_intercept['Score:300-350'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 300) & (inputs_train_with_ref_cat_w_intercept['Score'] < 350), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:350-400'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 350) & (inputs_train_with_ref_cat_w_intercept['Score'] < 400), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:400-450'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 400) & (inputs_train_with_ref_cat_w_intercept['Score'] < 450), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:450-500'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 450) & (inputs_train_with_ref_cat_w_intercept['Score'] < 500), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:500-550'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 500) & (inputs_train_with_ref_cat_w_intercept['Score'] < 550), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:550-600'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 550) & (inputs_train_with_ref_cat_w_intercept['Score'] < 600), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:600-650'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 600) & (inputs_train_with_ref_cat_w_intercept['Score'] < 650), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:650-700'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 650) & (inputs_train_with_ref_cat_w_intercept['Score'] < 700), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:700-750'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 700) & (inputs_train_with_ref_cat_w_intercept['Score'] < 750), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:750-800'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 750) & (inputs_train_with_ref_cat_w_intercept['Score'] < 800), 1, 0)
+inputs_train_with_ref_cat_w_intercept['Score:800-850'] = np.where((inputs_train_with_ref_cat_w_intercept['Score'] >= 800) & (inputs_train_with_ref_cat_w_intercept['Score'] <= 850), 1, 0)
+# Create dummy variables for score intervals in the dataframe with
+#  old ("expected").
+```
+
+### 3.3 Calculating PSI (Population Stability Index)
+
+#### Calculate the Proportions of Each Dummy Variable
+```
+In [176]:
+PSI_calc_train = inputs_train_with_ref_cat_w_intercept.sum() \
+/ inputs_train_with_ref_cat_w_intercept.shape[0]
+# Create a dataframe with proportions of observations for each dummy variable for the old ("expected") data.
+PSI_calc_train
+
+Out[176]:
+Intercept        1.000000
+grade:A          0.160200
+grade:B          0.294160
+grade:C          0.268733
+grade:D          0.164862
+                   ...   
+Score:600-650    0.270947
+Score:650-700    0.140628
+Score:700-750    0.053701
+Score:750-800    0.004147
+Score:800-850    0.000000
+Length: 114, dtype: float64
+```
+#### PSI Calculation
+Formula:<br>
+![image](https://user-images.githubusercontent.com/77659538/111416112-3ef5d900-871e-11eb-8b9c-6d51efa607d2.png)
+
+PSI results:
+```
+In [179]:
+#Sum by 'Original feature name'
+PSI_calc_grouped = \
+PSI_calc.groupby('Original feature name')['Contribution'].sum()
+PSI_calc_grouped
+Out[179]:
+Original feature name
+Score                          1.025021
+acc_now_delinq                 0.000925
+addr_state                     0.003837
+annual_inc                     0.005445
+dti                            0.078143
+emp_length                     0.007619
+grade                          0.006775
+home_ownership                 0.004275
+initial_list_status            0.333717
+inq_last_6mths                 0.046465
+int_rate                       0.079230
+mths_since_earliest_cr_line    0.033507
+mths_since_issue_d             2.388305
+mths_since_last_delinq         0.011594
+mths_since_last_record         0.056276
+purpose                        0.011645
+term                           0.013099
+verification_status            0.048219
+Name: Contribution, dtype: float64
+```
+🔶 Interpretation: A PSI greater than 0.25 indicates big difference between datasets over time. We need to take action to update our model.
+- PSI of 'initial_list_status', 'mths_since_issue_d' are greater than 0.25
+
 ## [4. LGD & EAD Model Building](https://github.com/shawn-y-sun/Credit_Risk_Model_LoanDefaults/blob/main/4.Credit%20Risk%20Modeling_LGD%20%26%20EAD%20Model.ipynb)
 In this part, we choose appropriate statistical models (linear/logistic regression) to train the LGD and EAD models, and we trained them using the dataset including only defaulted borrowers. The data preprocessing and model building approaches are quite similar to what we have done in PD Model.
 
