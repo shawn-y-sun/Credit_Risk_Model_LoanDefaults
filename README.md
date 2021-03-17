@@ -775,7 +775,7 @@ plt.hist(loan_data_defaults['CCF'], bins = 100);
 ```
 ![image](https://user-images.githubusercontent.com/77659538/111417841-977aa580-8721-11eb-9f9b-0e5521875422.png)
 
-### 4.3 LGD Model Building
+### 4.3 LGD Model
 #### Stage 1: Logistic Regression
 Goal: predict if the borrower has a recovery rate greater than 0
 - Split the data into train and test
@@ -831,12 +831,16 @@ recovery_rate	0
 recovery_rate	1.000000	0.307996
 0	0.307996	1.000000
 ```
+🔶 The correlation (0.31) indicates a satisfactory level of predicting power
 
 Distribution of residuals<br>
 ```
 # Plot the distribution of the residuals.
 sns.distplot(lgd_targets_stage_2_test - y_hat_test_lgd_stage_2)
 ```
+![image](https://user-images.githubusercontent.com/77659538/111420180-b713cd00-8725-11eb-95ec-40e1cfe2f5c6.png)
+
+🔶 The shape resembling a normal distribution and has a mean of 0, and 0 is where most of them are concentrated, indicating a satisfactory level of predicting power
 
 
 #### Combining Stage 1 and Stage 2
@@ -855,8 +859,36 @@ array([0.1193906 , 0.09605635, 0.        , ..., 0.12078611, 0.11587422,
        0.15667447])
 ```
 
-### Calculating EL
-Finally, we combined three models (PD, LGD, and EAD) together to calculate the expected loss. 
+### 4.4 EAD Model
+#### Linear Regression
+
+#### Model Evaluation
+Correlation<br>
+```
+Out[74]:
+CCF	0
+CCF	1.000000	0.530654
+0	0.530654	1.000000
+```
+🔶 Moderately strong correlation -> good predicting power
+
+Distribution of residuals<br>
+![image](https://user-images.githubusercontent.com/77659538/111420424-2c7f9d80-8726-11eb-9849-6577170ea265.png)
+
+🔶 Shape resembling normal distribution and has mean of 0 -> good predicting power
+
+
+### 4.5 Calculating EL
+We implement three models in our data and get the summary table:<br>
+|   | funded_amnt | PD       | LGD      | EAD         | EL          |
+|---|-------------|----------|----------|-------------|-------------|
+| 0 | 5000        | 0.164761 | 0.913729 | 2949.608449 | 444.053181  |
+| 1 | 2500        | 0.28234  | 0.915482 | 1944.433378 | 502.592155  |
+| 2 | 2400        | 0.229758 | 0.919484 | 1579.934302 | 333.775277  |
+| 3 | 10000       | 0.208892 | 0.904924 | 6606.559612 | 1248.848487 |
+| 4 | 3000        | 0.129556 | 0.911453 | 2124.631667 | 250.884853  |
+
+Finally, we calculate the expected loss. 
 ```
 In [109]:
 ratio_EL = total_EL / total_funded
