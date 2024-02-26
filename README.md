@@ -727,7 +727,7 @@ Name: Contribution, dtype: float64
 In this part, we choose appropriate statistical models (linear/logistic regression) to train the LGD and EAD models, and we trained them using the dataset including only defaulted borrowers. The data preprocessing and model building approaches are quite similar to what we have done in PD Model.
 
 ### 4.1 Data Preparation
-For LGD and EDA models, we only model on the data records of defaults since these stages are only taken into consideration when a borrower has defaulted.
+For LGD and EAD models, we only model on the data records of defaults since these stages are only taken into consideration when a borrower has defaulted.
 
 ### 4.2 Dependent Variables
 #### LGD
